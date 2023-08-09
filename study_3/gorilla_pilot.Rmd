@@ -1,0 +1,233 @@
+---
+title: "pheno_pilot"
+output: html_document
+date: "2023-08-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+### gorilla data handling
+
+```{r}
+# between-subject asynchronous
+
+async_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_bo.csv")
+async_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_parh.csv")
+
+async_bo = async_bo |> 
+  select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
+  slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_A Value`,
+    heard = `heard_A Quantised`,
+    prev = `prev_A Quantised`,
+    q1 = `Q1_A Quantised`,
+    q2 = `Q2_A Quantised`,
+    q3 = `Q3_A Quantised`,
+    q4 = `Q4_A Quantised`,
+    q5 = `Q5_A Quantised`,
+    q6 = `Q6_A Quantised`) |> 
+  mutate(condition = "async")
+
+async_parh = async_parh |> 
+  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+bw_async = inner_join(async_bo, async_parh, by = "id")
+rm(async_bo, async_parh)
+```
+
+```{r}
+# between-subject synchronous
+
+sync_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_bo.csv")
+sync_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_parh.csv")
+
+sync_bo = sync_bo |> 
+  select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
+  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_S Value`,
+    heard = `heard_S Quantised`,
+    prev = `prev_S Quantised`,
+    q1 = `Q1_S Quantised`,
+    q2 = `Q2_S Quantised`,
+    q3 = `Q3_S Quantised`,
+    q4 = `Q4_S Quantised`,
+    q5 = `Q5_S Quantised`,
+    q6 = `Q6_S Quantised`) |> 
+  mutate(condition = "sync")
+
+sync_parh = sync_parh |> 
+  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+bw_sync = inner_join(sync_bo, sync_parh, by = "id")
+rm(sync_bo, sync_parh)
+```
+
+```{r}
+# within-subject
+
+async_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_af_bo.csv")
+sync_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_af_bo.csv")
+async_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_sf_bo.csv")
+sync_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_sf_bo.csv")
+parh_within <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/parh.csv")
+
+async_within = bind_rows(async_af_bo, async_sf_bo)
+sync_within = bind_rows(sync_af_bo, sync_sf_bo)
+
+async_within = async_within |> 
+  select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
+  slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_A Value`,
+    heard = `heard_A Quantised`,
+    prev = `prev_A Quantised`,
+    q1 = `Q1_A Quantised`,
+    q2 = `Q2_A Quantised`,
+    q3 = `Q3_A Quantised`,
+    q4 = `Q4_A Quantised`,
+    q5 = `Q5_A Quantised`,
+    q6 = `Q6_A Quantised`) |> 
+  mutate(condition = "async")
+
+sync_within = sync_within |> 
+  select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
+  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_S Value`,
+    heard = `heard_S Quantised`,
+    prev = `prev_S Quantised`,
+    q1 = `Q1_S Quantised`,
+    q2 = `Q2_S Quantised`,
+    q3 = `Q3_S Quantised`,
+    q4 = `Q4_S Quantised`,
+    q5 = `Q5_S Quantised`,
+    q6 = `Q6_S Quantised`) |> 
+  mutate(condition = "sync")
+
+parh_within = parh_within |> 
+  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+sync_within = inner_join(sync_within, parh_within, by = "id")
+async_within = inner_join(async_within, parh_within, by = "id")
+
+rm(async_af_bo, async_sf_bo, parh_within, sync_af_bo, sync_sf_bo)
+```
+
+```{r}
+bw_async$design = "between"
+bw_sync$design = "between"
+sync_within$design = "within"
+async_within$design = "within"
+
+bw_async = bw_async |> 
+  mutate_all(as.character)
+
+bw_sync = bw_sync |> 
+  mutate_all(as.character)
+
+sync_within = sync_within |> 
+  mutate_all(as.character)
+
+async_within = async_within |> 
+  mutate_all(as.character)
+
+df = bind_rows(bw_async, bw_sync, sync_within, async_within)
+rm(bw_async, bw_sync, async_within, sync_within)
+
+write.csv(df, "gorilla_combined.csv")
+```
+
+### preprocessing
+
+```{r}
+# body ownership score
+
+df = df |> 
+  mutate_at(vars(q1, q2, q3, q4, q5, q6), as.numeric) |> 
+  mutate(bo = (q1 + q2 + q3 + q4 + q5 + q6)/6) |> 
+  mutate_at(vars(design, condition), as.factor)
+
+df_sliced = df |> dplyr::select(bo, condition, design, id)
+head(df_sliced)
+```
+
+### anova
+
+```{r}
+# model <- lmer(bo ~ condition * design + (1|id), data = df_sliced)
+# summary(model)
+```
+
+```{r}
+model <- aov(bo ~ condition * design, data = df_sliced)
+summary(model)
+
+# interaction.plot(x.factor = df_sliced$condition, trace.factor = df_sliced$design, response = df_sliced$bo)
+```
+
+```{r}
+df_sliced$predicted <- fitted(model)
+
+ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Condition", y = "Predicted Value", color = "Design") +
+  ylim(0, 7) +
+  theme_minimal()
+```
+
+```{r}
+# library(effects)
+# mod_eff <- effect("condition * design", model)
+# plot(mod_eff, multiline = TRUE)
+```
+
+```{r}
+# tukey plot (for future)
+
+# library(multcomp)
+# tukey_results <- glht(model, linfct = mcp(condition = "Tukey"))
+# plot(tukey_results)
+```
+
+
+
