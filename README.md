@@ -1,3 +1,4 @@
 # [CHI 2024] demand characteristics 
 
-**Phenomenological Control** preregistration: https://aspredicted.org/5GW_CM1
+**Keyboard** preregistration: [https://aspredicted.org/5GW_CM1](https://aspredicted.org/564_V9B)
+**Phenomenological Control** preregistration: [https://aspredicted.org/5GW_CM1](https://aspredicted.org/5GW_CM1)
