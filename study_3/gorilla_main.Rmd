@@ -1,11 +1,11 @@
 ---
-title: "phenomenology_pilot"
+title: "phenomenology_main"
 output: 
   html_document:
     code_folding: hide
     theme: cosmo
 editor_options:
-  chunk_output_type: console
+  chunk_output_type: inline
 date: "2023-08-09"
 ---
 
@@ -26,8 +26,14 @@ library(tidyverse)
 async_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_bo.csv")
 async_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_parh.csv")
 
+# data cleaning :: removing pilots and people who correctly identified the hypothesis
+async_guessers = c(9244492, 9244507, 9244410, 9244565, 9244578, 9244606, 9283218, 9283859)
+async_bo = async_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_bo = async_bo |> filter(!(`Participant Private ID` %in% async_guessers))
+async_bo = async_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
+
 async_bo = async_bo |> 
-  select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
+  dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
   # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_A Value`,
@@ -42,7 +48,7 @@ async_bo = async_bo |>
   mutate(condition = "async")
 
 async_parh = async_parh |> 
-  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
  # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
@@ -65,8 +71,17 @@ rm(async_bo, async_parh)
 sync_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_bo.csv")
 sync_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_parh.csv")
 
+# data cleaning :: removing pilots, people who correctly identified the hypothesis, people who are knowledgeable about the procedure, and failure of attention checks
+
+sync_guessers <- c(9244461, 9244503, 9252043, 9253570, 9283096)
+
+sync_bo = sync_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_bo = sync_bo |> filter(`Participant Private ID` != 9244545)
+sync_bo = sync_bo |> filter(!(`Participant Private ID` %in% sync_guessers))
+sync_bo = sync_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
+
 sync_bo = sync_bo |> 
-  select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
+  dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
  # slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_S Value`,
@@ -81,7 +96,7 @@ sync_bo = sync_bo |>
   mutate(condition = "sync")
 
 sync_parh = sync_parh |> 
-  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
  # slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
@@ -102,21 +117,42 @@ rm(sync_bo, sync_parh)
 # within-subject
 
 async_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_af_bo.csv")
+async_af_guessers <- c(9244320, 9283951, 9244931, 9244769)
+async_af_bo = async_af_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_af_bo = async_af_bo |> filter(!(`Participant Private ID` %in% async_af_guessers))
+async_af_bo = async_af_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
 async_af_bo = async_af_bo[-nrow(async_af_bo), ]
+
 sync_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_af_bo.csv")
+sync_af_guessers <- c(9244320, 9283951, 9247288, 9244769)
+sync_af_bo = sync_af_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_af_bo = sync_af_bo |> filter(!(`Participant Private ID` %in% sync_af_guessers))
+sync_af_bo = sync_af_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
 sync_af_bo = sync_af_bo[-nrow(sync_af_bo), ]
+
 async_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_sf_bo.csv")
+async_sf_guessers <- c(9244269, 9244329, 9244327, 9252135)
+async_sf_bo = async_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_sf_bo = async_sf_bo |> filter(!(`Participant Private ID` %in% async_sf_guessers))
+async_sf_bo = async_sf_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
 async_sf_bo = async_sf_bo[-nrow(async_sf_bo), ]
+
 sync_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_sf_bo.csv")
+sync_sf_guessers <- c(9252135)
+sync_sf_bo = sync_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_sf_bo = sync_sf_bo |> filter(!(`Participant Private ID` %in% sync_sf_guessers))
+sync_sf_bo = sync_sf_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
 sync_sf_bo = sync_sf_bo[-nrow(sync_sf_bo), ]
+
 parh_within <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/parh.csv")
+parh_within = parh_within |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
 parh_within = parh_within[-nrow(parh_within), ]
 
 async_within = bind_rows(async_af_bo, async_sf_bo)
 sync_within = bind_rows(sync_af_bo, sync_sf_bo)
 
 async_within = async_within |> 
-  select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
+  dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Quantised`, `Q2_A Quantised`, `Q3_A Quantised`, `Q4_A Quantised`, `Q5_A Quantised`, `Q6_A Quantised`) |> 
  # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_A Value`,
@@ -131,7 +167,7 @@ async_within = async_within |>
   mutate(condition = "async")
 
 sync_within = sync_within |> 
-  select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
+  dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Quantised`, `Q2_S Quantised`, `Q3_S Quantised`, `Q4_S Quantised`, `Q5_S Quantised`, `Q6_S Quantised`) |> 
 #  slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_S Value`,
@@ -146,7 +182,7 @@ sync_within = sync_within |>
   mutate(condition = "sync")
 
 parh_within = parh_within |> 
-  select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
 #  slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
@@ -217,15 +253,58 @@ summary(model)
 ```
 
 ```{r class.source = 'fold-show'}
-df_sliced$predicted <- fitted(model)
+library(gridExtra)
 
-ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+df_sliced$predicted <- fitted(model)
+residuals <- residuals(model)
+squared_residuals <- residuals^2
+variance <- sum(squared_residuals) / (length(squared_residuals) - length(coef(model)))
+standard_errors <- sqrt(variance)
+
+# Now assign the standard errors to the df_sliced$se column
+df_sliced$se <- standard_errors
+
+g1 = ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
   geom_line() +
   geom_point() +
   labs(x = "condition", y = "predicted Value", color = "design") +
   ylim(0, 7) +
   theme_minimal()
+
+g2 = ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = predicted - se, ymax = predicted + se, fill = design), alpha = 0.2) +
+  geom_point() +
+  labs(x = "condition", y = "p
+       redicted Value", color = "design", fill = "design") +
+  ylim(0, 7) +
+  theme_minimal()
+
+g3 = ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = predicted - se, ymax = predicted + se), width = 0.2) +
+  geom_ribbon(aes(ymin = predicted - se, ymax = predicted + se, fill = design), alpha = 0.2) +
+  labs(x = "condition", y = "predicted Value", color = "design", fill = "design") +
+  ylim(0, 7) +
+  theme_minimal()
+
+grid.arrange(g1, g2, g3, nrow = 2)
 ```
+
+```{r}
+ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "condition", y = "predicted Value", color = "design") +
+  # ylim(0, 7) +
+  theme_minimal()
+
+df |> group_by(design, condition) |> summarise(m = mean(bo))
+
+ggsave("study3_plot.jpg", width = 10, height = 6)
+```
+
 
 ```{r}
 #clibrary(effects)
@@ -236,16 +315,75 @@ ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = desi
 ```{r}
 tukey_results <- TukeyHSD(model)
 plot(tukey_results)
+```
+```{r}
+ ggplot(df_sliced, aes(x = condition, y = predicted, color = design, group = design)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "condition", y = "predicted Value", color = "design") +
+  ylim(0, 7) +
+  theme_minimal()
 
-p <- last_plot() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Customized Tukey HSD Plot",
-       x = "Comparison",
-       y = "Difference")
+ggplot(data=df_sliced, aes(x=condition, y=predicted, group=design, colour=design)) +
+  geom_line() +
+  #geom_errorbar(aes(ymin=min(predicted), ymax=max(predicted)), width=0.05, alpha=0.65, size=0.5) +
+  geom_point() +
+  scale_color_manual(values = c(alpha("#00AFBB", 0.75), alpha("#E7B800", 0.75))) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(colour = "#dddddd", size=0.4),
+    panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed", size=0.25),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.justification = "center",
+    legend.margin = margin(0,0,0,0),
+    legend.box.margin = margin(-5,-5,-5,-5),
+    plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"),
+    axis.ticks = element_line(size = .5, colour = "black"),
+    plot.title = element_text(size = 20)
+  ) +
+  guides(colour = guide_legend(override.aes = list(shape = NA, size = 0.75))) +
+  labs(title = "", x = "design", y = "body ownership")
 
-p
+ggsave("bo.jpg", width = 4, height = 3)
 ```
 
 
+```{r}
+df_sliced <- df_sliced %>%
+  group_by(condition, design) %>%
+  mutate(
+    ci_upper = predicted + 1.96 * se,  # You can adjust the multiplier (1.96 for 95% CI)
+    ci_lower = predicted - 1.96 * se
+  ) %>%
+  ungroup()
+
+# Create the plot with confidence intervals
+p <- ggplot(data=df_sliced, aes(x=condition, y=predicted, group=design, colour=design)) +
+  geom_line() +
+  geom_errorbar(aes(ymin=predicted - se, ymax=predicted + se), width=0.2, alpha=0.6) +  # Add error bars
+  geom_point() +
+  scale_color_manual(values = c(alpha("#00AFBB", 0.75), alpha("#E7B800", 0.75))) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(colour = "#dddddd", size=0.4),
+    panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed", size=0.25),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.justification = "center",
+    legend.margin = margin(0,0,0,0),
+    legend.box.margin = margin(-5,-5,-5,-5),
+    plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"),
+    axis.ticks = element_line(size = .5, colour = "black"),
+    plot.title = element_text(size = 20)
+  )
+
+# Print the ggplot object
+print(p)
+
+# Save the plot to a PDF
+pdf("bo.pdf", width = 4, height = 3)
+print(p)  # Print it again within the pdf() function
+dev.off()
+```
 

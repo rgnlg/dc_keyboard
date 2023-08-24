@@ -23,6 +23,13 @@ df = read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/stud
 ```
 
 ```{r}
+head(df)
+
+mean(df$cer[df$condition == 0])
+```
+
+
+```{r}
 library(afex)
 library(gtsummary)
 
@@ -52,6 +59,256 @@ plot_se <- ggline(df, x = "block", y = "wpm", color = "keyboard",
 
 
 grid.arrange(plot_ci, plot_se, ncol = 2)
+```
+
+```{r}
+g1 = ggline(df, x = "block", y = "wpm", color = "keyboard",
+                  add = c("mean_ci"),
+                  palette = c("#00AFBB", "#E7B800"),
+                  title = "Interaction plot with confidence intervals",
+                  xlab = "block",
+                  ylab = "wpm") + theme_minimal()
+
+ggsave("wpm_ci.jpg", width = 10, height = 7)
+```
+
+### sus
+
+```{r}
+df_sus = read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_1/df_sus.csv")
+head(df_sus)
+
+df_sus_c = df_sus |> mutate(sus = sus_cognitive) |> select(-sus_cognitive, -sus_baseline)
+df_sus_b = df_sus |> mutate(sus = sus_baseline) |> select(-sus_cognitive, -sus_baseline)
+
+mean(df_sus$sus_baseline)
+```
+
+```{r}
+head(df_sus)
+
+df_sus = df_sus |> mutate(condition = ifelse(condition == 0, "cognitive", "baseline"))
+
+g2 = df_sus %>%
+  group_by(preference) %>%
+  summarise(n = n())  %>%
+  ggplot(aes(x = preference, y = n, fill = preference)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() + 
+  scale_fill_manual(values = c("#00AFBB", "#E7B800")) + ggtitle("Preference distribution")
+
+#ggsave("wpm_ci.jpg", width = 10, height = 7)
+```
+
+```{r}
+grid.arrange(g1, g2, nrow = 1)
+g = arrangeGrob(g1, g2, nrow = 1)
+ggsave("study1_plots.jpg", g, width = 15, height = 6)
+```
+
+### aske
+
+```{r}
+library(Rmisc)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(data.table)
+```
+
+
+```{r}
+CONTROL_X = 0.3
+LOW_APPEARANCE_X = 1.0
+HIGH_APPEARANCE_X = 2.25
+
+CI95 <- function(arg) {
+  return(as.numeric(CI(arg)["upper"])-mean(arg))
+}
+# 
+# grp <- group_by(df, animation, color)
+# grpdata = summarise(grp, mean_score=mean(score_diff_concept), ci=CI95(score_diff_concept), count=length(post_score_concept))
+# 
+# pdf("interaction_score_line_concept.pdf", width=4, height=3)
+# 
+# linedata = data.table(
+#   id=factor(1:5),
+#   behavior = c("High behavior", "Low behavior", "High behavior", "Low behavior", "Control"),
+#   appearance = c(HIGH_APPEARANCE_X, HIGH_APPEARANCE_X, LOW_APPEARANCE_X, LOW_APPEARANCE_X, CONTROL_X),
+#   score = c(grpdata$mean_score[2], grpdata$mean_score[4], grpdata$mean_score[3], grpdata$mean_score[5], grpdata$mean_score[1]),
+#   ci = c(grpdata$ci[2], grpdata$ci[4], grpdata$ci[3], grpdata$ci[5], grpdata$ci[1])
+# )
+
+ggline(df, x = "block", y = "wpm", color = "keyboard",
+                  add = c("mean_ci"),
+                  palette = c("#00AFBB", "#E7B800"),
+                  title = "Interaction plot with confidence intervals",
+                  xlab = "block",
+                  ylab = "wpm") + theme_minimal()
+
+df_sliced = df |> dplyr::group_by(block, keyboard) |> mutate(wpm = mean(wpm))
+
+
+ggplot(data=df_sliced, aes(x=block, y=wpm, group=keyboard, colour=keyboard)) +
+  geom_line() +
+  geom_errorbar( aes(x=block, group=keyboard, ymin=wpm-CI95(wpm), ymax=wpm+CI95(wpm), colour=keyboard), width=0.05, alpha=0.65, size=0.5) + 
+  geom_point() +
+  scale_color_manual(values = c("#3ca9c3", "#f87c96")) +
+  theme_classic() +
+  theme(panel.grid.major = element_line(colour = "#dddddd",size=0.4), panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed",size=0.25))  +
+  theme(legend.title=element_blank()) +
+  theme(legend.position="bottom",
+        legend.justification="center",
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-5,-5,-5,-5)) +
+  theme(plot.margin=unit(c(0.1,0.1,0.1,0.1),"cm")) +
+  theme(axis.ticks = element_line(size = .5, colour="black")) +
+  theme(plot.title = element_text(size=20)) +
+  guides(colour = guide_legend(override.aes = list(shape = NA, size=.75))) +
+  scale_y_continuous(limits=c(0,5), expand = c(0, 0), oob = rescale_none) + 
+#  scale_x_continuous(limits=c(0,2.75), expand = c(0, 0), breaks = c(0, CONTROL_X, LOW_APPEARANCE_X, HIGH_APPEARANCE_X), labels=c("", "Control", "Low\nappearance", "High\nappearance")) +
+ # labs(title="B", x ="", y = expression(Delta*"score, conceptual")) +
+  theme(legend.position = "none")
+
+
+dev.off()
+```
+
+```{r}
+df |> select(block, keyboard, wpm)
+```
+
+
+```{r}
+#linedata <- df %>%
+ # dplyr::group_by(block, keyboard) %>%
+  #dplyr::summarise(mean_wpm = mean(wpm), ci = 1.96 * sd(wpm) / sqrt(n()), .groups = "drop")
+
+
+p = ggplot(data=linedata, aes(x=block, y=mean_wpm, group=keyboard, colour=keyboard)) +
+  geom_line() +
+  geom_errorbar(aes(ymin=mean_wpm-ci, ymax=mean_wpm+ci), width=0.05, alpha=0.65, size=0.5) +
+  geom_point() +
+  scale_color_manual(values = c(alpha("#00AFBB", 0.75), alpha("#E7B800", 0.75))) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(colour = "#dddddd", size=0.4),
+    panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed", size=0.25),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.justification = "center",
+    legend.margin = margin(0,0,0,0),
+    legend.box.margin = margin(-5,-5,-5,-5),
+    plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"),
+    axis.ticks = element_line(size = .5, colour = "black"),
+    plot.title = element_text(size = 20)
+  ) +
+  guides(colour = guide_legend(override.aes = list(shape = NA, size = 0.75))) +
+  labs(title = "", x = "block", y = "mean typing speed (wpm)")
+ # scale_y_continuous(limits = c(0, 5), expand = c(0, 0), oob = scales::rescale_none)  
+ # scale_x_continuous(
+   # limits = c(0, 2.75),
+  #  expand = c(0, 0),
+    #breaks = c(0, CONTROL_X, LOW_APPEARANCE_X, HIGH_APPEARANCE_X),
+#    labels = c("", "Control", "Low\nappearance", "High\nappearance")
+#  ) +
+ # labs(title = "B", x = "", y = expression(Delta * "score, conceptual"))
+
+# Print the ggplot object
+print(p)
+
+# Save the plot to a PDF
+pdf("wpm.pdf", width = 4, height = 3)
+print(p)  # Print it again within the pdf() function
+dev.off()
+
+```
+
+```{r}
+ggplot(data=df_sliced, aes(x=condition, y=predicted, group=design, colour=design)) +
+  geom_line() +
+  geom_errorbar(aes(ymin=predicted - se, ymax=predicted + se), width=0.2, alpha=0.6) +  # Add error bars
+  geom_point() +
+  scale_color_manual(values = c(alpha("#00AFBB", 0.75), alpha("#E7B800", 0.75))) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(colour = "#dddddd", size=0.4),
+    panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed", size=0.25),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.justification = "center",
+    legend.margin = margin(0,0,0,0),
+    legend.box.margin = margin(-5,-5,-5,-5),
+    plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"),
+    axis.ticks = element_line(size = .5, colour = "black"),
+    plot.title = element_text(size = 20)
+  )
+
+# Print the ggplot object
+print(p)
+
+# Save the plot to a PDF
+pdf("wpm.pdf", width = 4, height = 3)
+print(p)  # Print it again within the pdf() function
+dev.off()
+```
+
+
+```{r}
+source("help.R")
+library(Rmisc)
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+
+CI95 <- function(arg) {
+  return(as.numeric(CI(arg)["upper"])-mean(arg))
+}
+
+grp <- group_by(df, condition)
+data = summarise(grp, mean_humanness=mean(humanness), ci=CI95(humanness))
+data$x = c(
+  #0,1,2,3,4
+  1.5, 1.75, # high appearance
+  .75, 1, # low appearance
+  .25 # control
+)
+
+# behav/app
+# --------
+# high/high
+# low/high
+# high/low
+# low/low
+# control
+
+colors = c(
+  "#3ca9c3",
+  "#f87c96",
+  "#3ca9c3",
+  "#f87c96",
+  "gray"
+)
+
+pdf("humanness.pdf", width=5.6, height=2.5)
+
+# Most basic error bar
+ggplot(data) +
+  geom_bar( aes(x=x, y=mean_humanness), stat="identity", fill=colors, alpha=1.0) +
+  geom_errorbar( aes(x=x, ymin=mean_humanness-ci, ymax=mean_humanness+ci), colour="black", width=0.05, alpha=1.0, size=0.5) + 
+  theme_classic() +
+  theme(plot.title = element_text(size=20)) +
+  theme(panel.grid.major = element_line(colour = "#dddddd",size=0.4), panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed",size=0.25))  +
+  scale_y_continuous(limits=c(1,5), expand = c(0, 0), oob = rescale_none) +
+  scale_x_continuous(limits=c(0,2), expand = c(0, 0), breaks = c(0, .25, 0.875, 1.625), labels=c("", "Control", "Low appearance", "High appearance")) +
+  labs(title="A", x ="", y = "Mean humanness")
+  #geom_segment(aes(x=1, y=1.5, xend=2, yend=2), colour="black", size=.5) +
+  #annotate("text",x=1.75,y=4.6,label="*",size = 6)
+  
+
+
+dev.off()
 ```
 
 
