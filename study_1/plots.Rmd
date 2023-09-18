@@ -17,8 +17,6 @@ library(readr)
 library(tidyverse)
 library(gtsummary)
 library(Rmisc)
-# library(ggplot2)
-# library(dplyr)
 library(scales)
 library(data.table)
 library(cowplot)
@@ -27,7 +25,7 @@ library(gridExtra)
 
 ```{r}
 # dataset resulted from the analysis in main_analysis.ipynb doc
-df = read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_1/df_full_filtered.csv")
+df = read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_1/data/df_full_filtered.csv")
 ```
 
 ```{r}
