@@ -1,0 +1,323 @@
+---
+title: "phenomenology_main"
+output: 
+  html_document:
+    code_folding: hide
+    theme: cosmo
+editor_options:
+  chunk_output_type: inline
+date: "2023-08-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+### gorilla data handling
+
+```{r}
+# between-subject asynchronous
+
+async_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_bo.csv")
+async_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_parh.csv")
+
+# removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
+async_guessers = c(9244492, 9244507, 9244410, 9244565, 9244578, 9244606, 9283218, 9283859)
+async_bo = async_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_bo = async_bo |> filter(!(`Participant Private ID` %in% async_guessers))
+async_bo = async_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
+
+# study
+async_bo = async_bo |> 
+  dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Response`, `Q2_A Response`, `Q3_A Response`, `Q4_A Response`, `Q5_A Response`, `Q6_A Response`) |> 
+  # slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_A Value`,
+    heard = `heard_A Quantised`,
+    prev = `prev_A Quantised`,
+    q1 = `Q1_A Response`,
+    q2 = `Q2_A Response`,
+    q3 = `Q3_A Response`,
+    q4 = `Q4_A Response`,
+    q5 = `Q5_A Response`,
+    q6 = `Q6_A Response`) |> 
+  mutate(condition = "async")
+
+# demand characteristics control
+async_parh = async_parh |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+ # slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+bw_async = inner_join(async_bo, async_parh, by = "id")
+bw_async = bw_async[-nrow(bw_async), ]
+rm(async_bo, async_parh)
+```
+
+```{r}
+# between-subject synchronous
+
+sync_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_bo.csv")
+sync_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_parh.csv")
+
+# removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
+sync_guessers <- c(9244461, 9244503, 9252043, 9253570, 9283096)
+sync_bo = sync_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_bo = sync_bo |> filter(`Participant Private ID` != 9244545)
+sync_bo = sync_bo |> filter(!(`Participant Private ID` %in% sync_guessers))
+sync_bo = sync_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
+
+# study
+sync_bo = sync_bo |> 
+  dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Response`, `Q2_S Response`, `Q3_S Response`, `Q4_S Response`, `Q5_S Response`, `Q6_S Response`) |> 
+ # slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_S Value`,
+    heard = `heard_S Quantised`,
+    prev = `prev_S Quantised`,
+    q1 = `Q1_S Response`,
+    q2 = `Q2_S Response`,
+    q3 = `Q3_S Response`,
+    q4 = `Q4_S Response`,
+    q5 = `Q5_S Response`,
+    q6 = `Q6_S Response`) |> 
+  mutate(condition = "sync")
+
+# demand characteristics control
+sync_parh = sync_parh |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+ # slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+bw_sync = inner_join(sync_bo, sync_parh, by = "id")
+bw_sync = bw_sync[-nrow(bw_sync), ]
+rm(sync_bo, sync_parh)
+```
+
+```{r}
+# within-subject
+
+# removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
+async_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_af_bo.csv")
+within_guessers <- c(9244320, 9283951, 9244931, 9244769, 9247288, 9244269, 9244329, 9244327, 9252135)
+
+# study, data for asynchronous procedure, for people who got asynchronous condition first
+async_af_bo = async_af_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_af_bo = async_af_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
+async_af_bo = async_af_bo[-nrow(async_af_bo), ]
+
+# study, data for synchronous procedure, for people who got asynchronous condition first
+sync_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_af_bo.csv")
+sync_af_bo = sync_af_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_af_bo = sync_af_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
+sync_af_bo = sync_af_bo[-nrow(sync_af_bo), ]
+
+# study, data for asynchronous procedure, for people who got synchronous condition first
+async_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_sf_bo.csv")
+async_sf_bo = async_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+async_sf_bo = async_sf_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
+async_sf_bo = async_sf_bo[-nrow(async_sf_bo), ]
+
+# study, data for synchronous procedure, for people who got synchronous condition first
+sync_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_sf_bo.csv")
+sync_sf_bo = sync_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+sync_sf_bo = sync_sf_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
+sync_sf_bo = sync_sf_bo[-nrow(sync_sf_bo), ]
+
+# demand characteristics cotrol
+parh_within <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/parh.csv")
+parh_within = parh_within |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
+parh_within = parh_within[-nrow(parh_within), ]
+
+async_within = bind_rows(async_af_bo, async_sf_bo)
+sync_within = bind_rows(sync_af_bo, sync_sf_bo)
+
+async_within = async_within |> 
+  dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Response`, `Q2_A Response`, `Q3_A Response`, `Q4_A Response`, `Q5_A Response`, `Q6_A Response`) |> 
+ # slice(1:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_A Value`,
+    heard = `heard_A Quantised`,
+    prev = `prev_A Quantised`,
+    q1 = `Q1_A Response`,
+    q2 = `Q2_A Response`,
+    q3 = `Q3_A Response`,
+    q4 = `Q4_A Response`,
+    q5 = `Q5_A Response`,
+    q6 = `Q6_A Response`) |> 
+  mutate(condition = "async") |> filter(!(id %in% within_guessers))
+
+sync_within = sync_within |> 
+  dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Response`, `Q2_S Response`, `Q3_S Response`, `Q4_S Response`, `Q5_S Response`, `Q6_S Response`) |> 
+#  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    cause = `cause_S Value`,
+    heard = `heard_S Quantised`,
+    prev = `prev_S Quantised`,
+    q1 = `Q1_S Response`,
+    q2 = `Q2_S Response`,
+    q3 = `Q3_S Response`,
+    q4 = `Q4_S Response`,
+    q5 = `Q5_S Response`,
+    q6 = `Q6_S Response`) |> 
+  mutate(condition = "sync") |> filter(!(id %in% within_guessers))
+
+parh_within = parh_within |> 
+  dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
+#  slice(2:(n() - 1)) |> 
+  rename(id = `Participant Private ID`,
+    gender = `gender Quantised`,
+    age = `age Value`,
+    parh1 = `parh1 Quantised`,
+    parh2 = `parh2 Quantised`,
+    parh3 = `parh3 Quantised`,
+    parh4 = `parh4 Quantised`,
+    hypothesis = `hypothesis Value`
+  )
+
+sync_within = inner_join(sync_within, parh_within, by = "id") 
+async_within = inner_join(async_within, parh_within, by = "id")
+
+sync_within = sync_within %>%
+  semi_join(async_within, by = "id")
+
+async_within = async_within %>%
+  semi_join(sync_within, by = "id")
+
+rm(async_af_bo, async_sf_bo, parh_within, sync_af_bo, sync_sf_bo)
+```
+
+```{r}
+# assigning "design" condition in the combined dataset
+
+bw_async$design = "Between"
+bw_sync$design = "Between"
+sync_within$design = "Within"
+async_within$design = "Within"
+
+bw_async = bw_async |> 
+  mutate_all(as.character)
+
+bw_sync = bw_sync |> 
+  mutate_all(as.character)
+
+sync_within = sync_within |> 
+  mutate_all(as.character)
+
+async_within = async_within |> 
+  mutate_all(as.character)
+
+df = bind_rows(bw_async, bw_sync, sync_within, async_within)
+rm(bw_async, bw_sync, async_within, sync_within)
+
+write.csv(df, "gorilla_combined.csv")
+```
+
+### preprocessing
+
+
+```{r class.source = 'fold-show'}
+# body ownership score
+
+df = df |> 
+  mutate_at(vars(q1, q2, q3, q4, q5, q6), as.numeric) |> 
+  mutate(bo = (q1 + q2 + q3 + q4 + q5 + q6)/6) |> mutate(condition = ifelse(condition == "sync", "Synchronous", "Asynchronous")) |>
+  mutate_at(vars(design, condition), as.factor)
+
+df_sliced = df |> dplyr::select(bo, condition, design, id)
+```
+
+```{r}
+mean(df$bo[df$condition == "Synchronous"])
+sd(df$bo[df$condition == "Synchronous"])
+
+mean(df$bo[df$condition == "Asynchronous"])
+sd(df$bo[df$condition == "Asynchronous"])
+```
+
+### anova
+
+```{r}
+model <- aov(bo ~ condition * design, data = df_sliced)
+
+parameters::model_parameters(model)
+
+library(effectsize)
+options(es.use_symbols = TRUE) 
+
+eta_squared(model, partial = FALSE)
+cohens_f(model)
+```
+```{r}
+# standard errors assignment
+
+df_sliced$predicted <- fitted(model)
+residuals <- residuals(model)
+squared_residuals <- residuals^2
+variance <- sum(squared_residuals) / (length(squared_residuals) - length(coef(model)))
+standard_errors <- sqrt(variance)
+
+
+df_sliced$se <- standard_errors
+```
+
+```{r}
+# confidence intervals
+
+df_sliced <- df_sliced %>%
+  group_by(condition, design) %>%
+  mutate(
+    ci_upper = predicted + 1.96 * se,  # You can adjust the multiplier (1.96 for 95% CI)
+    ci_lower = predicted - 1.96 * se
+  ) %>%
+  ungroup() 
+
+p = ggplot(data=df_sliced, aes(x=condition, y=predicted, group=design, colour=design)) +
+  geom_line(position=position_dodge(width=0.1)) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0.2, alpha=0.6, position=position_dodge(width=0.1)) +  
+  geom_point(position=position_dodge(width=0.1)) +
+  scale_color_manual(values = c(alpha("#00AFBB", 0.75), alpha("#E7B800", 0.5)), labels = c("Between-subjects", "Within-subjects")) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(colour = "#dddddd", size=0.4),
+    panel.grid.major.x = element_line(colour = "#dddddd", linetype="dashed", size=0.25),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.justification = "center",
+    legend.margin = margin(0,0,0,0),
+    legend.box.margin = margin(-5,-5,-5,-5),
+    plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"),
+    axis.ticks = element_line(size = .5, colour = "black"),
+    plot.title = element_text(size = 20)
+  ) + guides(colour = guide_legend(override.aes = list(shape = NA, size = 0.75))) +
+  labs(title = "", x = "Synchrony", y = "Body ownership") + scale_y_continuous(limits = c(-4, 4), expand = c(0, 0))
+
+# Print the ggplot object
+print(p)
+
+# Save the plot to a PDF
+pdf("bo_ci.pdf", width = 4, height = 3)
+print(p)  # Print it again within the pdf() function
+dev.off()
+```
