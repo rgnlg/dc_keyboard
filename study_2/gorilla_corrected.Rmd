@@ -23,8 +23,8 @@ library(tidyverse)
 ```{r}
 # between-subject asynchronous
 
-async_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_bo.csv")
-async_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/async/async_parh.csv")
+async_bo <- read_csv("/data/async/async_bo.csv")
+async_parh <- read_csv("/data/async/async_parh.csv")
 
 # removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
 async_guessers = c(9244492, 9244507, 9244410, 9244565, 9244578, 9244606, 9283218, 9283859)
@@ -35,7 +35,6 @@ async_bo = async_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Res
 # study
 async_bo = async_bo |> 
   dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Response`, `Q2_A Response`, `Q3_A Response`, `Q4_A Response`, `Q5_A Response`, `Q6_A Response`) |> 
-  # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_A Value`,
     heard = `heard_A Quantised`,
@@ -51,7 +50,6 @@ async_bo = async_bo |>
 # demand characteristics control
 async_parh = async_parh |> 
   dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
- # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
     age = `age Value`,
@@ -70,8 +68,8 @@ rm(async_bo, async_parh)
 ```{r}
 # between-subject synchronous
 
-sync_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_bo.csv")
-sync_parh <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/sync/sync_parh.csv")
+sync_bo <- read_csv("/data/sync/sync_bo.csv")
+sync_parh <- read_csv("/data/sync/sync_parh.csv")
 
 # removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
 sync_guessers <- c(9244461, 9244503, 9252043, 9253570, 9283096)
@@ -83,7 +81,6 @@ sync_bo = sync_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Respo
 # study
 sync_bo = sync_bo |> 
   dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Response`, `Q2_S Response`, `Q3_S Response`, `Q4_S Response`, `Q5_S Response`, `Q6_S Response`) |> 
- # slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_S Value`,
     heard = `heard_S Quantised`,
@@ -99,7 +96,6 @@ sync_bo = sync_bo |>
 # demand characteristics control
 sync_parh = sync_parh |> 
   dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
- # slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
     age = `age Value`,
@@ -119,7 +115,7 @@ rm(sync_bo, sync_parh)
 # within-subject
 
 # removing pilots, people who correctly identified the hypothesis (manual check), people who are knowledgeable about the procedure, and failure of attention checks
-async_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_af_bo.csv")
+async_af_bo <- read_csv("/data/within/async_af_bo.csv")
 within_guessers <- c(9244320, 9283951, 9244931, 9244769, 9247288, 9244269, 9244329, 9244327, 9252135)
 
 # study, data for asynchronous procedure, for people who got asynchronous condition first
@@ -128,25 +124,25 @@ async_af_bo = async_af_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev
 async_af_bo = async_af_bo[-nrow(async_af_bo), ]
 
 # study, data for synchronous procedure, for people who got asynchronous condition first
-sync_af_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_af_bo.csv")
+sync_af_bo <- read_csv("/data/within/sync_af_bo.csv")
 sync_af_bo = sync_af_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
 sync_af_bo = sync_af_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
 sync_af_bo = sync_af_bo[-nrow(sync_af_bo), ]
 
 # study, data for asynchronous procedure, for people who got synchronous condition first
-async_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/async_sf_bo.csv")
+async_sf_bo <- read_csv("/data/within/async_sf_bo.csv")
 async_sf_bo = async_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
 async_sf_bo = async_sf_bo |> filter(`heard_A Response` != "Yes") |> filter(`prev_A Response` != "Yes")
 async_sf_bo = async_sf_bo[-nrow(async_sf_bo), ]
 
 # study, data for synchronous procedure, for people who got synchronous condition first
-sync_sf_bo <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/sync_sf_bo.csv")
+sync_sf_bo <- read_csv("/data/within/sync_sf_bo.csv")
 sync_sf_bo = sync_sf_bo |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
 sync_sf_bo = sync_sf_bo |> filter(`heard_S Response` != "Yes") |> filter(`prev_S Response` != "Yes")
 sync_sf_bo = sync_sf_bo[-nrow(sync_sf_bo), ]
 
 # demand characteristics cotrol
-parh_within <- read_csv("/Users/olgaiarygina/Documents/GitHub/dc_keyboard/dc_keyboard/study_3/data/within/parh.csv")
+parh_within <- read_csv("/data/within/parh.csv")
 parh_within = parh_within |> mutate(`UTC Date and Time` = as.POSIXct(`UTC Date and Time`, format = "%d/%m/%Y %H:%M:%S")) |> filter(`UTC Date and Time` >= as.POSIXct("2023-08-01"))
 parh_within = parh_within[-nrow(parh_within), ]
 
@@ -155,7 +151,6 @@ sync_within = bind_rows(sync_af_bo, sync_sf_bo)
 
 async_within = async_within |> 
   dplyr::select(`Participant Private ID`, `cause_A Value`, `heard_A Quantised`, `prev_A Quantised`, `Q1_A Response`, `Q2_A Response`, `Q3_A Response`, `Q4_A Response`, `Q5_A Response`, `Q6_A Response`) |> 
- # slice(1:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_A Value`,
     heard = `heard_A Quantised`,
@@ -170,7 +165,6 @@ async_within = async_within |>
 
 sync_within = sync_within |> 
   dplyr::select(`Participant Private ID`, `cause_S Value`, `heard_S Quantised`, `prev_S Quantised`, `Q1_S Response`, `Q2_S Response`, `Q3_S Response`, `Q4_S Response`, `Q5_S Response`, `Q6_S Response`) |> 
-#  slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     cause = `cause_S Value`,
     heard = `heard_S Quantised`,
@@ -185,7 +179,6 @@ sync_within = sync_within |>
 
 parh_within = parh_within |> 
   dplyr::select(`Participant Private ID`, `gender Quantised`, `age Value`, `parh1 Quantised`, `parh2 Quantised`, `parh3 Quantised`, `parh4 Quantised`, `hypothesis Value`) |> 
-#  slice(2:(n() - 1)) |> 
   rename(id = `Participant Private ID`,
     gender = `gender Quantised`,
     age = `age Value`,
@@ -231,7 +224,7 @@ async_within = async_within |>
 df = bind_rows(bw_async, bw_sync, sync_within, async_within)
 rm(bw_async, bw_sync, async_within, sync_within)
 
-write.csv(df, "gorilla_combined.csv")
+write.csv(df, "/data/gorilla_combined.csv")
 ```
 
 ### preprocessing
@@ -317,7 +310,7 @@ p = ggplot(data=df_sliced, aes(x=condition, y=predicted, group=design, colour=de
 print(p)
 
 # Save the plot to a PDF
-pdf("bo_ci.pdf", width = 4, height = 3)
+pdf("/figures/bo_ci.pdf", width = 4, height = 3)
 print(p)  # Print it again within the pdf() function
 dev.off()
 ```
